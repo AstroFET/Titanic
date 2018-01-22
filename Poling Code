@@ -1,0 +1,100 @@
+/*Name: Michael J Calisi
+ *Date: 11/16/17
+ *code: 212 LED code
+ */
+
+
+#include <EEL4746.h>
+#include <msp430.h>
+#include <stdint.h>
+#include <stdio.h>
+const uint8_t RED_ON = 0;
+const uint8_t GREEN_ON = 2;
+const uint8_t OFF = 5;
+void BlinkLED(uint8_t);
+void myDelay(uint32_t);
+const uint32_t LOAD = 104500;
+void main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;
+
+    P1DIR |= BIT0;//led1
+    P4DIR |= BIT7;//led2
+
+    P2DIR &= ~BIT1;//s1
+    P2REN|= BIT1;
+    P1OUT &=~BIT0;
+    P4OUT &=~BIT7;
+    P2OUT|= BIT1;
+
+
+    BlinkLED(OFF);
+
+
+    while(1)
+    {
+
+        if((P2IN&BIT1) == 0)
+        {
+            BlinkLED(RED_ON);
+            BlinkLED(GREEN_ON);
+            BlinkLED(RED_ON);
+            BlinkLED(OFF);
+
+
+
+        }
+
+}
+
+}
+
+void myLED (uint8_t Color)
+{
+   switch(Color)
+   {
+       case 0:
+           P1OUT |= BIT0;
+           break;
+
+       case RED_ON + 1:
+           P1OUT &=~BIT0;
+           break;
+
+       case GREEN_ON:
+           P4OUT |= BIT7;
+           break;
+
+       case GREEN_ON + 1:
+           P4OUT &=~BIT7;
+           break;
+
+       case OFF:
+           P1OUT |=BIT0;
+           P4OUT |=BIT7;
+           break;
+       case OFF+1:
+                  P1OUT &=~BIT0;
+                  P4OUT &=~BIT7;
+                  break;
+   }
+}
+
+
+
+void myDelay(uint32_t LOAD)
+{
+    EnableTimer4746(LOAD);
+
+    while ((TA0CTL & BIT0) == 0){}
+
+    DisableTimer4746();
+}
+
+void BlinkLED(uint8_t Color)
+{
+    myLED(Color);
+    myDelay(LOAD);
+    myLED(Color+1);
+    myDelay(LOAD);
+}
